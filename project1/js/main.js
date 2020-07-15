@@ -5,29 +5,44 @@ window.addEventListener('DOMContentLoaded', () => {
     modals();
 });
 */
+let modalState = {};
 //-------------- Modal windows -----------------------------------
-function bindModal(triggerSelector, modalSelector, closeSelector) {
+function bindModal(triggerSelector, modalSelector, closeSelector, closeClickOverlay = true) {
     const trigger = document.querySelectorAll(triggerSelector);
     const modal = document.querySelector(modalSelector);
     const close = document.querySelector(closeSelector);
+    const windows = document.querySelectorAll('[data-modal]');
 
     trigger.forEach(item => {
             item.addEventListener('click', (e) => {
                 if (e.target) {
                 e.preventDefault();
                 }
+
+            windows.forEach(item => {
+                item.style.display = 'none';
+            });
+
             modal.style.display = "block";
             document.body.style.overflow = "hidden";
             });
     });
 
     close.addEventListener('click', () => {
+        windows.forEach(item => {
+            item.style.display = 'none';
+        });
+        
         modal.style.display = "none";
         document.body.style.overflow = "";
     });
 
     modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
+        if (e.target === modal && closeClickOverlay) {
+            windows.forEach(item => {
+                item.style.display = 'none';
+            });
+            
             modal.style.display = "none";
             document.body.style.overflow = "";
         }
@@ -36,6 +51,9 @@ function bindModal(triggerSelector, modalSelector, closeSelector) {
 
 bindModal('.popup_engineer_btn', '.popup_engineer', '.popup_engineer .popup_close');
 bindModal('.phone_link', '.popup', '.popup .popup_close');
+bindModal('.popup_calc_btn', '.popup_calc', '.popup_calc_close');
+bindModal('.popup_calc_button', '.popup_calc_profile', '.popup_calc_profile_close', false);
+bindModal('.popup_calc_profile_button', '.popup_calc_end', '.popup_calc_end_close', false);
 
 //-------------- End Modal Windows ----------------------------------------
 
@@ -79,18 +97,84 @@ const tabs = (headerSelector, tabSelector, contentSelector, activeClass) => {
 
 tabs('.glazing_slider', '.glazing_block', '.glazing_content', 'active');
 tabs('.decoration_slider', '.no_click', '.decoration_content > div > div', 'after_click');
+tabs('.balcon_icons', '.balcon_icons_img', '.big_img > img', 'do_image_more', 'inline-block');
 //---------------- End of work with tabs--------------------------------------
 
+//------------------Check number in the input ------------------------------
+const checkNumInputs = (selector) => {
+    const numInputs = document.querySelectorAll(selector);
+
+    numInputs.forEach(item => {
+        item.addEventListener('input', () => {
+            item.value = item.value.replace(/\D/, '');
+        });
+    });
+};
+//-------------------End check numbers in the input-------------------------
+
+//---------------------Start----------------------------------------------
+const changeModalState = (stat) => {
+    const windowForm = document.querySelectorAll('.balcon_icons_img');
+    const windowWidth = document.querySelectorAll('#width');
+    const windowHeight = document.querySelectorAll('#height');
+    const windowType = document.querySelectorAll('#view_type');
+    const windowProfile = document.querySelectorAll('.checkbox');
+
+    checkNumInputs('#width');
+    checkNumInputs('#height');
+
+    function bindActionToElems(event, elem, prop) {
+        elem.forEach((item, i) => {
+            item.addEventListener(event, () => {
+                switch(item.nodeName) {
+                    case 'SPAN':
+                        stat[prop] = i;
+                        break;
+                    case 'INPUT':
+                        if(item.getAttribute('type')==='checkbox') {
+                            i===0 ? stat[prop]="Холодное" : stat[prop]="Теплое";
+                            elem.forEach((box,j) => {
+                                box.checked=false;
+                                if(i == j) {
+                                    box.checked = true;
+                                }
+                            });
+                        } else {
+                            stat[prop] = item.value;
+                        }
+                        break;
+                    case 'SELECT':
+                        stat[prop] = item.value;
+                        break;
+                }
+                console.log(stat);
+            });
+        });
+    }
+
+    bindActionToElems('click', windowForm, 'form');
+    bindActionToElems('input', windowHeight, 'height');
+    bindActionToElems('input', windowWidth, 'width');
+    bindActionToElems('change', windowType, 'type');
+    bindActionToElems('change', windowProfile, 'profile');
+};
+
+
+//---------------------End---------------------------------------
+
 //------------ Sending data to server ------------------------------------
+function forms (state) {
 const form = document.querySelectorAll('form');
 const inputs = document.querySelectorAll('input');
-const phoneInputs = document.querySelectorAll('input[name="user_phone"]');
+//const phoneInputs = document.querySelectorAll('input[name="user_phone"]');
 
-phoneInputs.forEach(item => {
+/*phoneInputs.forEach(item => {
     item.addEventListener('input', () => {
         item.value = item.value.replace(/\D/,'');
     });
-});
+}); */
+
+checkNumInputs('input[name="user_phone"]');
 
 const message = {
     loading: 'Загрузка...',
@@ -122,8 +206,13 @@ form.forEach(item => {
         item.appendChild(statusMessage);
 
         const formData = new FormData(item);
+        if (item.getAttribute('data-calc')==="end") {
+            for (let key in state) {
+                formData.append(key, state[key]);
+            }
+        }
 
-        postData('/assets/server.php', formData)
+        postData('server.php', formData)
             .then(res => {
                 console.log(res);
                 statusMessage.textContent = message.success;
@@ -137,102 +226,8 @@ form.forEach(item => {
             });
     });
 });
+}
 //------------------End Sending Data to Sever--------------------------------
 
-//------------------ Calculator Modal Window ------------------------------
-function calcModal(calc_btnSelector, calc_windowSelector, calc_closeSelector) {
-    const calc_btn = document.querySelectorAll(calc_btnSelector);
-    const calc_window = document.querySelector(calc_windowSelector);
-    const calc_close = document.querySelector(calc_closeSelector);
-    const big_img = document.querySelectorAll('.big_img img');
-    const calcInputs = document.querySelectorAll('.popup_calc_content .form-control');
-    const calc_button = document.querySelector('.popup_calc_button');
-    const calc_profile = document.querySelector('.popup_calc_profile');
-    const calc_profile_button = document.querySelector('.popup_calc_profile_button');
-    const calc_profile_close = document.querySelector('.popup_calc_profile_close');
-    const calc_end = document.querySelector('.popup_calc_end');
-    const calc_end_close = document.querySelector('.popup_calc_end_close');
-
-    calc_btn.forEach(item => {
-        item.addEventListener('click', (e) => {
-            if (e.target) {
-                e.preventDefault();
-            }
-        calc_window.style.display = "block";
-        document.body.style.overflow = "hidden";
-        });
-    });
-
-    calc_close.addEventListener('click', () => {
-        calc_window.style.display = "none";
-        document.body.style.overflow = "";
-    });
-
-    calcInputs.forEach(item => {
-        item.addEventListener('input', () => {
-            item.value = item.value.replace(/\D/,'');
-        });
-    });
-
-    calc_button.addEventListener('click', () => {
-        calc_window.style.display = "none";
-        calc_profile.style.display = "flex";
-
-        calc_profile_close.addEventListener('click', () => {
-            calc_profile.style.display = "none";
-            document.body.style.overflow = "";
-        });
-
-        calc_profile_button.addEventListener('click', () => {
-            calc_profile.style.display = "none";
-            calc_end.style.display = "flex";
-
-            calc_end_close.addEventListener('click', () => {
-                calc_end.style.display = "none";
-                document.body.style.overflow = "";
-            });
-        });
-
-    });
-  
-    function balcons (headerbalconSelector, imgbalconSelector) {
-        const header_balcon = document.querySelector(headerbalconSelector);
-        const img_balcon = document.querySelectorAll(imgbalconSelector);
-        //const img_more = document.querySelector(imgmoreSelector);
-
-        function hideImgMore() {
-            img_balcon.forEach(item => {
-                item.classList.remove('do_image_more');
-            });
-
-            big_img.forEach(item => {
-                item.style.display = 'none';
-            });
-        }
-
-        function showImgMore(i = 0) {
-            img_balcon[i].classList.add('do_image_more');
-            big_img[i].style.display='flex';
-        }
-
-        hideImgMore();
-        showImgMore(0);
-
-        header_balcon.addEventListener('click', (e) => {
-            const target = e.target;
-                img_balcon.forEach((item,i) => {
-                    if (target == item || target.parentNode == item) {
-                        hideImgMore();
-                        showImgMore(i);
-                    }
-                });
-        });
-
-    }
-
-    balcons('.balcon_icons', '.balcon_icons_img');
-}
-
-
-calcModal('.popup_calc_btn', '.popup_calc', '.popup_calc_close');
-//----------------End calculator modal window-----------------------------------
+changeModalState(modalState);
+forms(modalState);
