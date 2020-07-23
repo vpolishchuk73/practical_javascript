@@ -231,7 +231,7 @@
 			<h2>Рассчитайте стоимость и получите скидку 30%</h2>
 			<div class=row>
 				<div class="col-md-4 col-offset-1">
-					<form class=form action=# method=POST enctype=multipart/form-data>
+					<form class="form calc_form" action="#" enctype=multipart/form-data>
 						<h4>Загрузите свое фото</h4>
 						<div class=file_upload>
 							<button type=button>Загрузить фотографию</button>
@@ -596,7 +596,7 @@
 			<p class=p-heading>Остались вопросы?</p>
 			<h2>Получите консультацию художника!</h2>
 			<div class="col-md-10 col-md-offset-1">
-				<form action=# method=POST>
+				<form action="#">
 					<div class=input-wrapper>
 						<input type=text name=name placeholder="Ваше имя" required>
 						<input type=text name=phone placeholder="Ваш телефон" required>
@@ -665,9 +665,9 @@
 				<button class=popup-close>&times;</button>
 				<h4>Остались вопросы? Закажите обратный звонок</h4>
 				<div class=main-form>
-					<form class=form action=# method=POST>
-						<input type=text name=name placeholder="Ваше имя" required>
-						<input type=text name=phone placeholder="Ваш телефон" required>
+					<form class="form" action="#">
+						<input type="text" name="name" placeholder="Ваше имя" required>
+						<input type="text" name="phone" placeholder="Ваш телефон" required>
 						<button class="button button-order">Получить консультацию</button>
 					</form>
 				</div>
@@ -696,7 +696,7 @@
 						<input type=file name=upload>
 					</div>
 					<div class=main-form>
-						<div class=form>
+						<div class="form">
 							<input type=text name=name placeholder="Ваше имя" required>
 							<input type=text name=phone placeholder="Ваш телефон" required>
 							<input type=text name=email placeholder="Ваш e-mail">
