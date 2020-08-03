@@ -22,6 +22,7 @@ const modals = () => {
 
                 windows.forEach(item => {
                     item.style.display = 'none';
+                    item.classList.add('animated', 'fadeIn');
                 });
     
                 modal.style.display = "block";
@@ -89,7 +90,9 @@ const modals = () => {
 
     function openByScroll(selector) {
         window.addEventListener('scroll', () => {
-            if(!btnPressed && (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight)) {
+            let scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+
+            if (!btnPressed && (window.pageYOffset + document.documentElement.clientHeight >= scrollHeight)) {
                 document.querySelector(selector).click();
             }
         });
@@ -97,9 +100,9 @@ const modals = () => {
 
     bindModal('.button-design', '.popup-design', '.popup-design .popup-close');
     bindModal('.button-consultation', '.popup-consultation', '.popup-consultation .popup-close');
-    bindModal('.fixed-gift', '.popup-gift', '.popup-gift .popup-close');
+    bindModal('.fixed-gift', '.popup-gift', '.popup-gift .popup-close', true);
     openByScroll('.fixed-gift');
-    //showModalByTime('.popup-consultation', 60000);
+    // showModalByTime('.popup-consultation', 5000);
 };
 
 export default modals;
